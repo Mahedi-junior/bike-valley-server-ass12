@@ -10,15 +10,24 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET);
 app.use(cors());
 app.use(express.json());
 
-//
-//
+//start
 
-const uri = process.env.DB_URI;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jtynkkk.mongodb.net/?retryWrites=true&w=majority`;
+// console.log(uri);
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
+
+//end
+
+// const uri = process.env.DB_URI;
+// const client = new MongoClient(uri, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
+//   serverApi: ServerApiVersion.v1,
+// });
 
 function verifyJWT(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -39,13 +48,14 @@ function verifyJWT(req, res, next) {
 
 function run() {
   try {
-    const categoryCollection = client.db("cellSwap").collection("categories");
-    const phonesCollection = client.db("cellSwap").collection("phones");
-    const usersCollection = client.db("cellSwap").collection("users");
-    const bookingsCollection = client.db("cellSwap").collection("bookings");
-    const adsCollection = client.db("cellSwap").collection("ads");
-    const wishlistCollection = client.db("cellSwap").collection("wishlist");
-    const paymentsCollection = client.db("cellSwap").collection("payments");
+    const categoryCollection = client.db("bikeValley").collection("categories");
+    // const phonesCollection = client.db("cellSwap").collection("phones");
+    const bikesCollection = client.db("bikeValley").collection("bikes");
+    const usersCollection = client.db("bikeValley").collection("users");
+    const bookingsCollection = client.db("bikeValley").collection("bookings");
+    const adsCollection = client.db("bikeValley").collection("ads");
+    const wishlistCollection = client.db("bikeValley").collection("wishlist");
+    const paymentsCollection = client.db("bikeValley").collection("payments");
 
     app.get("/categories", async (req, res) => {
       const categories = await categoryCollection.find({}).toArray();
@@ -54,40 +64,56 @@ function run() {
 
     app.get("/categories/:category", async (req, res) => {
       const query = { category: req.params.category };
-      const singleCategory = await categoryCollection.findOne(query);
+      const singleCategory = await bikesCollection.find(query).toArray();
       res.send(singleCategory);
     });
 
     app.get("/phones", async (req, res) => {
       const query = {};
-      const phones = await phonesCollection.find(query).toArray();
+      const phones = await bikesCollection.find(query).toArray();
       res.send(phones);
     });
+
+    // app.put("/update", async (req, res) => {
+    //   const filter = { category: "Bazaz Bike" };
+    //   const options = { upsert: true };
+    //   const updateDoc = {
+    //     $set: {
+    //       category: "Bajaj",
+    //     },
+    //   };
+    //   const result = await bikesCollection.updateMany(
+    //     filter,
+    //     updateDoc,
+    //     options
+    //   );
+    //   res.send(result);
+    // });
 
     app.get("/phones/categories/:category", async (req, res) => {
       const category = req.params.category;
       const query = { category: category };
-      const phones = await phonesCollection.find(query).toArray();
+      const phones = await bikesCollection.find(query).toArray();
       res.send(phones);
     });
 
     app.post("/phones", async (req, res) => {
       const phone = req.body;
-      const result = await phonesCollection.insertOne(phone);
+      const result = await bikesCollection.insertOne(phone);
       res.send(result);
     });
 
     app.get("/phones/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
-      const phone = await phonesCollection.findOne(query);
+      const phone = await bikesCollection.findOne(query);
       res.send(phone);
     });
 
     app.get("/myPhones", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
-      const phones = await phonesCollection.find(query).toArray();
+      const phones = await bikesCollection.find(query).toArray();
       res.send(phones);
     });
 
@@ -189,7 +215,7 @@ function run() {
     app.put("/wishlist", async (req, res) => {
       const id = req.query.id;
       const filter = { _id: ObjectId(id) };
-      const phone = await phonesCollection.findOne(filter);
+      const phone = await bikesCollection.findOne(filter);
       const wishlistPhone = { ...phone, email: req.body.email };
 
       const options = { upsert: true };
@@ -255,14 +281,14 @@ function run() {
       const user = await usersCollection.findOne(filter);
 
       if (user.role === "Seller") {
-        const phones = await phonesCollection.find(filter).toArray();
+        const phones = await bikesCollection.find(filter).toArray();
         const updateDoc = {
           $set: {
             status: "verified",
           },
         };
         const sellerUpdate = await usersCollection.updateOne(filter, updateDoc);
-        const phonesUpdate = await phonesCollection.updateMany(
+        const phonesUpdate = await bikesCollection.updateMany(
           filter,
           updateDoc
         );
@@ -302,7 +328,7 @@ function run() {
         bookFilter,
         updatedDoc
       );
-      const phones = await phonesCollection.updateOne(filter, updatedDoc);
+      const phones = await bikesCollection.updateOne(filter, updatedDoc);
       const ads = await adsCollection.updateOne(adsFilter, updatedDoc);
       res.send(result);
     });
