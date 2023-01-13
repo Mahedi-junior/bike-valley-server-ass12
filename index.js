@@ -90,14 +90,14 @@ function run() {
     //   res.send(result);
     // });
 
-    app.get("/phones/categories/:category", async (req, res) => {
+    app.get("/bikes/categories/:category", async (req, res) => {
       const category = req.params.category;
       const query = { category: category };
       const phones = await bikesCollection.find(query).toArray();
       res.send(phones);
     });
 
-    app.post("/phones", async (req, res) => {
+    app.post("/bikes", async (req, res) => {
       const phone = req.body;
       const result = await bikesCollection.insertOne(phone);
       res.send(result);
@@ -270,6 +270,7 @@ function run() {
         const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
           expiresIn: "3d",
         });
+        console.log(token);
         return res.send({ accessToken: token });
       }
       res.status(403).send({ accessToken: "" });
