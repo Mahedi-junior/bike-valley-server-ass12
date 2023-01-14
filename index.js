@@ -49,7 +49,6 @@ function verifyJWT(req, res, next) {
 function run() {
   try {
     const categoryCollection = client.db("bikeValley").collection("categories");
-    // const phonesCollection = client.db("cellSwap").collection("phones");
     const bikesCollection = client.db("bikeValley").collection("bikes");
     const usersCollection = client.db("bikeValley").collection("users");
     const bookingsCollection = client.db("bikeValley").collection("bookings");
@@ -67,11 +66,11 @@ function run() {
       const singleCategory = await bikesCollection.find(query).toArray();
       res.send(singleCategory);
     });
-    // phones
+
     app.get("/bikes", async (req, res) => {
       const query = {};
-      const phones = await bikesCollection.find(query).toArray();
-      res.send(phones);
+      const bikes = await bikesCollection.find(query).toArray();
+      res.send(bikes);
     });
 
     // app.put("/update", async (req, res) => {
@@ -93,28 +92,30 @@ function run() {
     app.get("/bikes/categories/:category", async (req, res) => {
       const category = req.params.category;
       const query = { category: category };
-      const phones = await bikesCollection.find(query).toArray();
-      res.send(phones);
+      const bikes = await bikesCollection.find(query).toArray();
+      res.send(bikes);
     });
 
     app.post("/bikes", async (req, res) => {
-      const phone = req.body;
-      const result = await bikesCollection.insertOne(phone);
+      const bike = req.body;
+      // console.log(bike);
+      const result = await bikesCollection.insertOne(bike);
       res.send(result);
     });
-    // phones
+
     app.get("/bikes/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const phone = await bikesCollection.findOne(query);
       res.send(phone);
     });
-    // myPhones
+
+    // myBikes
     app.get("/myBikes", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
-      const phones = await bikesCollection.find(query).toArray();
-      res.send(phones);
+      const bikes = await bikesCollection.find(query).toArray();
+      res.send(bikes);
     });
 
     app.put("/users/:email", async (req, res) => {
@@ -257,8 +258,8 @@ function run() {
         return res.status(403).send({ message: "forbidden access" });
       }
 
-      const adsPhones = await adsCollection.find({}).toArray();
-      res.send(adsPhones);
+      const adsBikes = await adsCollection.find({}).toArray();
+      res.send(adsBikes);
     });
 
     app.get("/jwt", async (req, res) => {
@@ -270,7 +271,7 @@ function run() {
         const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
           expiresIn: "3d",
         });
-        console.log(token);
+        // console.log(token);
         return res.send({ accessToken: token });
       }
       res.status(403).send({ accessToken: "" });
@@ -282,19 +283,16 @@ function run() {
       const user = await usersCollection.findOne(filter);
 
       if (user.role === "Seller") {
-        const phones = await bikesCollection.find(filter).toArray();
+        const bikes = await bikesCollection.find(filter).toArray();
         const updateDoc = {
           $set: {
             status: "verified",
           },
         };
         const sellerUpdate = await usersCollection.updateOne(filter, updateDoc);
-        const phonesUpdate = await bikesCollection.updateMany(
-          filter,
-          updateDoc
-        );
+        const bikesUpdate = await bikesCollection.updateMany(filter, updateDoc);
 
-        res.json({ sellerUpdate, phonesUpdate });
+        res.json({ sellerUpdate, bikesUpdate });
       }
       // return res.send({message: 'This user is not seller'})
     });
@@ -329,8 +327,8 @@ function run() {
         bookFilter,
         updatedDoc
       );
-      const phones = await bikesCollection.updateOne(filter, updatedDoc);
-      const ads = await adsCollection.updateOne(adsFilter, updatedDoc);
+      const bikes = await bikesCollection.updateOne(filter, updatedDoc);
+      const adsBikes = await adsCollection.updateOne(adsFilter, updatedDoc);
       res.send(result);
     });
   } finally {
