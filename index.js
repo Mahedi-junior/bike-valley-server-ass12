@@ -67,8 +67,8 @@ function run() {
       const singleCategory = await bikesCollection.find(query).toArray();
       res.send(singleCategory);
     });
-
-    app.get("/phones", async (req, res) => {
+    // phones
+    app.get("/bikes", async (req, res) => {
       const query = {};
       const phones = await bikesCollection.find(query).toArray();
       res.send(phones);
@@ -102,15 +102,15 @@ function run() {
       const result = await bikesCollection.insertOne(phone);
       res.send(result);
     });
-
-    app.get("/phones/:id", async (req, res) => {
+    // phones
+    app.get("/bikes/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const phone = await bikesCollection.findOne(query);
       res.send(phone);
     });
-
-    app.get("/myPhones", async (req, res) => {
+    // myPhones
+    app.get("/myBikes", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
       const phones = await bikesCollection.find(query).toArray();
